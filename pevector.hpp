@@ -7,7 +7,7 @@ namespace iknk
   struct Vector {
     Vector();
     ~Vector();
-    bool isEmpty();
+    bool isEmpty() const noexcept;
     private:
       T * data;
       size_t size, capacity;
@@ -15,7 +15,13 @@ namespace iknk
 }
 
 template<class T>
-iknk::Vector<T>():
+bool iknk::Vector<T>::isEmpty() const noexcept
+{
+  return false;
+}
+
+template<class T>
+iknk::Vector<T>::Vector():
   data(nullptr),
   size(0),
   capacity(0)
