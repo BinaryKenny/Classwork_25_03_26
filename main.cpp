@@ -16,6 +16,19 @@ bool testDefaultVectorIsEmpty(const char ** pname)
   return v.isEmpty();
 }
 
+bool testSizeOfEmptyVector(const char ** pname)
+{
+  *pname = __func__;
+  Vector<int> v;
+  return !v.getSize();
+}
+
+bool testSizeOfNonEmptyVector(const char ** pname)
+{
+  *pname = __func__;
+  return false;
+}
+
 int main()
 {
   size_t failed = 0;
@@ -23,7 +36,9 @@ int main()
   using case_t = std::pair<test_t, const char *>;
   case_t tests[] = {
     {testConstractAndDecstruct, "Vector must be default constructable"},
-    {testDefaultVectorIsEmpty, "Default constructed Vector must be empty"}
+    {testDefaultVectorIsEmpty, "Default constructed Vector must be empty"},
+    {testSizeOfEmptyVector, "Size of empty Vector must be zero"},
+    {testSizeOfNonEmptyVector, "Size of non-empty vector must be greater than zero"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
@@ -37,6 +52,6 @@ int main()
       std::cout << "\t" << tests[i].second << "\n";
     }
   }
-  std::cout << "Summary:\n" << "\t" << (count - failed) << "passed\n";
+  std::cout << "Summary:\n" << "\t" << (count - failed) << " passed\n";
   std::cout << "\t" << count << "total\n";
 }

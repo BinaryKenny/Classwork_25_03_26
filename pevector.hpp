@@ -8,6 +8,7 @@ namespace iknk
     Vector();
     ~Vector();
     bool isEmpty() const noexcept;
+    size_t getSize() const noexcept;
     private:
       T * data;
       size_t size, capacity;
@@ -17,7 +18,13 @@ namespace iknk
 template<class T>
 bool iknk::Vector<T>::isEmpty() const noexcept
 {
-  return false;
+  return !size;
+}
+
+template<class T>
+size_t iknk::Vector<T>::getSize() const noexcept
+{
+  return -1;
 }
 
 template<class T>
