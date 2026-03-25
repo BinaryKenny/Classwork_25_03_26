@@ -5,8 +5,11 @@ namespace iknk
 {
   template<class T>
   struct Vector {
-    T * data;
-    size_t size, capacity;
+    Vector();
+    ~Vector();
+    private:
+      T * data;
+      size_t size, capacity;
   };
 }
 
