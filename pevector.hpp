@@ -10,14 +10,18 @@ namespace iknk
     Vector(size_t size, const T & value);
     Vector(const Vector<T> & rhs) = delete;
     Vector<T> & operator=(const Vector<T> & rhs) = delete;
-
     bool isEmpty() const noexcept;
     size_t getSize() const noexcept;
 
-    void pushBack(const T &); // написать pushBack()
-    void popBack(); // написать
 
+
+    size_t getCapacity() const noexcept; // реализовать и написать тест
+
+
+    void pushBack(const T &); // написать pushBack() написать тест
+    void popBack(); // написать тест и реализовать
     private:
+      explicit Vector(size_t size);
       T * data;
       size_t size_, capacity;
   };
@@ -37,21 +41,11 @@ size_t iknk::Vector<T>::getSize() const noexcept
 
 template<class T>
 iknk::Vector<T>::Vector(size_t size, const T & value):
-  data(size ? new T[size] : nullptr),
-  size_(size),
-  capacity(size)
+  Vector(size)
 {
   for (size_t i = 0; i < size; i++)
   {
-    try
-    {
-      data[i] = value;
-    }
-    catch(...)
-    {
-      delete [] data;
-      throw;
-    }
+    data[i] = value;
   }
 }
 template<class T>
@@ -65,4 +59,11 @@ iknk::Vector<T>::~Vector()
 {
   delete [] data;
 }
+
+template<class T>
+Vector<T>::Vector(size_t size):
+  data(size ? new T[size] : nullptr),
+  size_(size),
+  capacity(size)
+{}
 #endif
