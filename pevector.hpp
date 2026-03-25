@@ -19,32 +19,45 @@ namespace iknk
 
     private:
       T * data;
-      size_t size, capacity;
+      size_t size_, capacity;
   };
 }
 
 template<class T>
 bool iknk::Vector<T>::isEmpty() const noexcept
 {
-  return !size;
+  return !size_;
 }
 
 template<class T>
 size_t iknk::Vector<T>::getSize() const noexcept
 {
-  return size;
+  return size_;
 }
 
 template<class T>
 iknk::Vector<T>::Vector(size_t size, const T & value):
   data(size ? new T[size] : nullptr),
-  size(0),
+  size_(size),
   capacity(size)
-{}
+{
+  for (size_t i = 0; i < size; i++)
+  {
+    try
+    {
+      data[i] = value;
+    }
+    catch(...)
+    {
+      delete [] data;
+      throw;
+    }
+  }
+}
 template<class T>
 iknk::Vector<T>::Vector():
   data(nullptr),
-  size(0),
+  size_(0),
   capacity(0)
 {}
 template <class T>
