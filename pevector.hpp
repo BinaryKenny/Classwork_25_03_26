@@ -24,7 +24,7 @@ bool iknk::Vector<T>::isEmpty() const noexcept
 template<class T>
 size_t iknk::Vector<T>::getSize() const noexcept
 {
-  return -1;
+  return size;
 }
 
 template<class T>
