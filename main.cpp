@@ -53,6 +53,21 @@ bool testCapacityOfVector(const char ** pname)
   }
 }
 
+bool testPushBackOfVector(const char ** pname)
+{
+  *pname = __func__;
+  try
+  {
+    Vector<int> v(2, 10);
+    v.pushBack(7);
+    
+  }
+  catch (...)
+  {
+    throw;
+  }
+}
+
 int main()
 {
   size_t failed = 0;
@@ -63,7 +78,8 @@ int main()
     {testDefaultVectorIsEmpty, "Default constructed Vector must be empty"},
     {testSizeOfEmptyVector, "Size of empty Vector must be zero"},
     {testSizeOfNonEmptyVector, "Size of non-empty vector must be greater than zero"},
-    {testCapacityOfVector, "Capacity of non-empty vector must be greater than zero"}
+    {testCapacityOfVector, "Capacity of non-empty vector must be greater than zero"},
+    {testPushBackOfVector, "PushBack is wrong"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)

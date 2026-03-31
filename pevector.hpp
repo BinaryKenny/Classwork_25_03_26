@@ -12,11 +12,11 @@ namespace iknk
     Vector<T> & operator=(const Vector<T> & rhs) = delete;
     bool isEmpty() const noexcept;
     size_t getSize() const noexcept;
-
     size_t getCapacity() const noexcept;
 
-    void pushBack(const T &); // написать pushBack() написать тест
-    void popBack(); // написать тест и реализовать
+    T & operator[](size_t index);
+    void pushBack(const T &);
+    void popBack();
     private:
       explicit Vector(size_t size);
       T * data;
@@ -70,7 +70,7 @@ size_t iknk::Vector<T>::getCapacity() const noexcept
   return capacity;
 }
 
-template<Class T>
+template<class T>
 void iknk::Vector<T>::pushBack(const T & value)
 {
   if (size_ == capacity)
@@ -80,7 +80,7 @@ void iknk::Vector<T>::pushBack(const T & value)
     {
       new_data = new T[capacity * 2];
       capacity *= 2;
-      for (size_t i = 0; i < size; i++)
+      for (size_t i = 0; i < size_; i++)
       {
         new_data[i] = data[i];
       }
@@ -93,6 +93,17 @@ void iknk::Vector<T>::pushBack(const T & value)
       throw;
     }
   }
-  data[size++] = value;
+  data[size_++] = value;
 }
+
+template<class T>
+void iknk::Vector<T>::popBack()
+{
+  if (size_ == 0)
+  {
+    throw std::logic_error();
+  }
+  size_--;
+}
+
 #endif
