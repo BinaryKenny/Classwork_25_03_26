@@ -60,7 +60,7 @@ bool testPushBackOfVector(const char ** pname)
   {
     Vector<int> v(2, 10);
     v.pushBack(7);
-    
+    return v[v.getSize() - 1] == 7;
   }
   catch (...)
   {

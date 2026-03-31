@@ -1,6 +1,7 @@
 #ifndef PE_VECTOR_HPP
 #define PE_VECTOR_HPP
 #include <cstddef>
+#include <stdexcept>
 namespace iknk
 {
   template<class T>
@@ -101,9 +102,14 @@ void iknk::Vector<T>::popBack()
 {
   if (size_ == 0)
   {
-    throw std::logic_error();
+    throw std::logic_error("Logic error: vector is empty");
   }
   size_--;
 }
 
+template<class T>
+T & iknk::Vector<T>::operator[](size_t index)
+{
+  return data[index];
+}
 #endif
