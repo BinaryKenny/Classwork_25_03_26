@@ -30,12 +30,12 @@ bool testSizeOfNonEmptyVector(const char ** pname)
   try
   {
     Vector<int> v(size, 10);
+    return v.getSize() == size;
   }
   catch(...)
   {
     throw;
   }
-  return v.getSize() == size;
 }
 
 int main()
@@ -62,5 +62,5 @@ int main()
     }
   }
   std::cout << "Summary:\n" << "\t" << (count - failed) << " passed\n";
-  std::cout << "\t" << count << "total\n";
+  std::cout << "\t" << count << " total\n";
 }

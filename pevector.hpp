@@ -13,10 +13,7 @@ namespace iknk
     bool isEmpty() const noexcept;
     size_t getSize() const noexcept;
 
-
-
     size_t getCapacity() const noexcept; // реализовать и написать тест
-
 
     void pushBack(const T &); // написать pushBack() написать тест
     void popBack(); // написать тест и реализовать
@@ -61,9 +58,15 @@ iknk::Vector<T>::~Vector()
 }
 
 template<class T>
-Vector<T>::Vector(size_t size):
+iknk::Vector<T>::Vector(size_t size):
   data(size ? new T[size] : nullptr),
   size_(size),
   capacity(size)
 {}
+
+template<class T>
+size_t iknk::Vector<T>::getCapacity() const noexcept
+{
+    return capacity;
+}
 #endif
