@@ -38,17 +38,20 @@ namespace iknk
 }
 
 template<class T>
-iknk::Vector<T> & Vector<T>(const Vector<T> && rhs) noexcept:
+iknk::Vector<T> & iknk::Vector<T>(const iknk::Vector<T> && rhs) noexcept:
 data(rhs.data),
 size_(rhs.size_),
 capacity(rhs.capacity)
 {
   rhs.data = nullptr;
-  
 }
 template<class T>
 iknk::Vector<T> & iknk::Vector<T>::operator(Vector<T> && rhs) noexcept
 {
+  if (this == &rhs)
+  {
+    return *this;
+  }
   Vector<T> cpy(std::move(rhs));
   swap(cpy);
   return *this;
@@ -76,7 +79,7 @@ void iknk::Vector<T>::swap(Vector<T> & rhs) noexcept
 }
 
 template<class T>
-iknk::Vector<T>::Vector(const Vector<T> & rhs):
+iknk::Vector<T> & iknk::Vector<T>(const Vector<T> & rhs):
   Vector(rhs.getSize())
 {
   for (size_t i = 0; i < rhs.getSize(); i++)
@@ -141,6 +144,10 @@ iknk::Vector<T>::Vector(size_t size, const T & value):
 template<class T>
 iknk::Vector<T> & iknk::Vector<T>::operator=(const Vector<T> & rhs)
 {
+  if (this == std::adressof(rhs))   //для взятия именно адреса
+  {
+    return *this;
+  }
   Vector<T> cpy(rhs);
   swap(cpy);
   return *this;

@@ -124,7 +124,7 @@ bool testElementCheckedOutOfBoundAccess(const char ** pname)
   try
   {
     v.at(0);
-      return false;
+    return false;
   }
   catch (const std::out_of_range & e)
   {
@@ -164,7 +164,7 @@ bool testCopyConstructor(const char ** pname)
   v.pushBack(1);
   v.pushBack(2);
   Vector< int > yav = v;
-  if (!v.isEmpty() && !yav.isEmpty())
+  if (v.isEmpty() || yav.isEmpty())
   {
     throw std::out_of_range("id out of bound");
   }
@@ -189,18 +189,29 @@ int main()
   using test_t = bool(*)(const char **);
   using case_t = std::pair<test_t, const char *>;
     case_t tests[] = {
-        {testConstractAndDecstruct, "Vector must be default constructable"},
-        {testDefaultVectorIsEmpty, "Default constructed Vector must be empty"},
-        {testSizeOfEmptyVector, "Size of empty Vector must be zero"},
-        {testSizeOfNonEmptyVector, "Size of non-empty vector must be greater than zero"},
-        {testCapacityOfVector, "Capacity of non-empty vector must be greater than zero"},
+        {testConstractAndDecstruct, "Vector must be default"
+            " constructable"},
+        {testDefaultVectorIsEmpty, "Default constructed"
+            " Vector must be empty"},
+        {testSizeOfEmptyVector, "Size of empty"
+            " Vector must be zero"},
+        {testSizeOfNonEmptyVector, "Size of non-empty"
+            " vector must be greater than zero"},
+        {testCapacityOfVector, "Capacity of non-empty"
+            " vector must be greater than zero"},
         {testPushBackOfVector, "PushBack is wrong"},
-        {testPopBackOfVector, "PopBack is wrong: size of vector is not the same the expected"},
-        {testElementCheckedAccess, "Inbound access must return lvalue reference"},
-        {testElementCheckedOutOfBoundAccess, "Out of bound access must generate exception"},
-        {testCopyConstructor, "Copied vector must be equal to original"},
-        {testElementCheckedConstAccess, "Inbound const access must return lvalue reference"},
-        {testElementCheckedOutOfBoundConstAccess, "Out of bound const access must generate exception"}
+        {testPopBackOfVector, "PopBack is wrong: size of"
+            " vector is not the same the expected"},
+        {testElementCheckedAccess, "Inbound access must"
+            " return lvalue reference"},
+        {testElementCheckedOutOfBoundAccess, "Out of bound access"
+            " must generate exception"},
+        {testCopyConstructor, "Copied vector must be"
+            " equal to original"},
+        {testElementCheckedConstAccess, "Inbound const access must"
+            " return lvalue reference"},
+        {testElementCheckedOutOfBoundConstAccess, "Out of bound const"
+            " access must generate exception"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
