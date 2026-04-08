@@ -5,10 +5,10 @@ OBJS = main.o
 DEPS = $(OBJS:%.o=%.d)
 
 $(UNIT_TESTS): $(OBJS)
-$(CXX) -o $@ $^
+	$(CXX) -o $@ $^
 
 clean:
 	-@$(RM) $(UNIT_TESTS) 
-        @$(RM) $(OBJS) $(DEPS)
+	@$(RM) $(OBJS) $(DEPS)
 
 -include main.d
