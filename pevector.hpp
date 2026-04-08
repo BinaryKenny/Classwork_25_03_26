@@ -2,6 +2,7 @@
 #define PE_VECTOR_HPP
 #include <cstddef>
 #include <stdexcept>
+#include <utility>
 namespace iknk
 {
   template<class T>
@@ -9,15 +10,22 @@ namespace iknk
     Vector();
     ~Vector();
     Vector(size_t size, const T & value);
+
     Vector(const Vector<T> & rhs);
-    Vector<T> & operator=(const Vector<T> & rhs) = delete;
+    Vector(const Vector<T> && rhs);
+    Vector<T> & operator=(const Vector<T> & rhs);
+    Vector<T> & operator=(Vector<T> && rhs) noexcept;
     bool isEmpty() const noexcept;
     size_t getSize() const noexcept;
     size_t getCapacity() const noexcept;
-
-    T & operator[](size_t id) noexcept;
+      
+    void swap(Vector<T> & rhs) noexcept;
+    
     void pushBack(const T &);
     void popBack();
+    void pushFront(const T &);
+
+    T & operator[](size_t id) noexcept;
     const T & operator[](size_t id) const noexcept;
     T & at(size_t id);
     const T & at(size_t id) const;
@@ -27,6 +35,44 @@ namespace iknk
       T * data;
       size_t size_, capacity;
   };
+}
+
+template<class T>
+iknk::Vector<T> & Vector<T>(const Vector<T> && rhs) noexcept:
+data(rhs.data),
+size_(rhs.size_),
+capacity(rhs.capacity)
+{
+  rhs.data = nullptr;
+  
+}
+template<class T>
+iknk::Vector<T> & iknk::Vector<T>::operator(Vector<T> && rhs) noexcept
+{
+  Vector<T> cpy(std::move(rhs));
+  swap(cpy);
+  return *this;
+}
+template<class T>
+void iknk::Vector<T>::pushFront(const T & t)
+{
+  Vector<T> v(getSize() + 1);
+  v[0] = t;
+  {
+    for (size_t i = 1; i < v.getSize(); ++i)
+    {
+      v[i] = (*this)[i - 1];
+    }
+  }
+  swap(v);
+}
+
+template<class T>
+void iknk::Vector<T>::swap(Vector<T> & rhs) noexcept
+{
+  std::swap(data, rhs.data);
+  std::swap(size_, rhs.size_);
+  std::swap(capacity, rhs.capacity);
 }
 
 template<class T>
@@ -61,7 +107,7 @@ const T & iknk::Vector<T>::at(size_t id) const
   {
       return (*this)[id];
   }
-  throw std::out_of_range("id > size");
+  throw std::out_of_range("id out of bound");
 }
 
 template<class T>
@@ -91,6 +137,15 @@ iknk::Vector<T>::Vector(size_t size, const T & value):
     data[i] = value;
   }
 }
+
+template<class T>
+iknk::Vector<T> & iknk::Vector<T>::operator=(const Vector<T> & rhs)
+{
+  Vector<T> cpy(rhs);
+  swap(cpy);
+  return *this;
+}
+
 template<class T>
 iknk::Vector<T>::Vector():
   data(nullptr),
