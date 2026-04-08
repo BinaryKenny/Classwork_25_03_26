@@ -15,7 +15,7 @@ namespace iknk
     size_t getSize() const noexcept;
     size_t getCapacity() const noexcept;
 
-    T & operator[](size_t index);
+    T & operator[](size_t id) noexcept;
     void pushBack(const T &);
     void popBack();
     const T & operator[](size_t id) const noexcept;
@@ -42,17 +42,38 @@ iknk::Vector<T>::Vector(const Vector<T> & rhs):
 template<class T>
 T & iknk::Vector<T>::at(size_t id)
 {
-  if (!(getSize() > id))
-  {
-    return data[id];
-  }
-  throw std::logic_error("id > size");
+  const Vector<T> * cthis = this;
+  const T & cr = cthis->at(id);
+  T & r = const_cast< T & >(cr);
+  return r;
 }
 
 template<class T>
 bool iknk::Vector<T>::isEmpty() const noexcept
 {
   return !size_;
+}
+
+template<class T>
+const T & iknk::Vector<T>::at(size_t id) const
+{
+  if (id < getSize())
+  {
+      return (*this)[id];
+  }
+  throw std::out_of_range("id > size");
+}
+
+template<class T>
+T & iknk::Vector<T>::operator[](size_t id) noexcept
+{
+  return data[id];
+}
+
+template<class T>
+const T & iknk::Vector<T>::operator[](size_t id) const noexcept
+{
+  return data[id];
 }
 
 template<class T>
@@ -129,11 +150,5 @@ void iknk::Vector<T>::popBack()
     throw std::logic_error("Logic error: vector is empty");
   }
   size_--;
-}
-
-template<class T>
-T & iknk::Vector<T>::operator[](size_t index)
-{
-  return data[index];
 }
 #endif

@@ -99,10 +99,48 @@ bool testElementCheckedAccess(const char ** pname)
     return false;
   }
 }
+
+bool testElementCheckedConstAccess(const char ** pname)
+{
+  *pname = __func__;
+  Vector< int > v;
+  v.pushBack(2);
+  const Vector< int > & rv = v;
+  try
+  {
+    const int & r = rv.at(0);
+    return r == 2;
+  }
+  catch(...)
+  {
+    return false;
+  }
+}
+
 bool testElementCheckedOutOfBoundAccess(const char ** pname)
 {
   *pname = __func__;
   Vector< int > v;
+  try
+  {
+    v.at(0);
+      return false;
+  }
+  catch (const std::out_of_range & e)
+  {
+    const char * text = e.what();
+    return !std::strcmp("id out of bound", text);
+  }
+  catch(...)
+  {
+    return false;
+  }
+}
+
+bool testElementCheckedOutOfBoundConstAccess(const char ** pname)
+{
+  *pname = __func__;
+  const Vector< int > v;
   try
   {
     v.at(0);
@@ -160,7 +198,9 @@ int main()
         {testPopBackOfVector, "PopBack is wrong: size of vector is not the same the expected"},
         {testElementCheckedAccess, "Inbound access must return lvalue reference"},
         {testElementCheckedOutOfBoundAccess, "Out of bound access must generate exception"},
-        {testCopyConstructor, "Copied vector must be equal to original"}
+        {testCopyConstructor, "Copied vector must be equal to original"},
+        {testElementCheckedConstAccess, "Inbound const access must return lvalue reference"},
+        {testElementCheckedOutOfBoundConstAccess, "Out of bound const access must generate exception"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
