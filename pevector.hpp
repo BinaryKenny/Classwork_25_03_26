@@ -9,7 +9,7 @@ namespace iknk
     Vector();
     ~Vector();
     Vector(size_t size, const T & value);
-    Vector(const Vector<T> & rhs) = delete;
+    Vector(const Vector<T> & rhs);
     Vector<T> & operator=(const Vector<T> & rhs) = delete;
     bool isEmpty() const noexcept;
     size_t getSize() const noexcept;
@@ -18,11 +18,35 @@ namespace iknk
     T & operator[](size_t index);
     void pushBack(const T &);
     void popBack();
+    const T & operator[](size_t id) const noexcept;
+    T & at(size_t id);
+    const T & at(size_t id) const;
+
     private:
       explicit Vector(size_t size);
       T * data;
       size_t size_, capacity;
   };
+}
+
+template<class T>
+iknk::Vector<T>::Vector(const Vector<T> & rhs):
+  Vector(rhs.getSize())
+{
+  for (size_t i = 0; i < rhs.getSize(); i++)
+  {
+    data[i] = rhs.data[i];
+  }
+}
+
+template<class T>
+T & iknk::Vector<T>::at(size_t id)
+{
+  if (!(getSize() > id))
+  {
+    return data[id];
+  }
+  throw std::logic_error("id > size");
 }
 
 template<class T>

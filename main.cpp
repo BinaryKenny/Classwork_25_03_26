@@ -1,5 +1,6 @@
 #include "pevector.hpp"
 #include <iostream>
+#include <cstring>
 using iknk::Vector;
 
 bool testConstractAndDecstruct(const char ** pname)
@@ -83,25 +84,100 @@ bool testPopBackOfVector(const char ** pname)
   }
 }
 
+bool testElementCheckedAccess(const char ** pname)
+{
+  *pname = __func__;
+  Vector< int > v;
+  v.pushBack(2);
+  try
+  {
+    int & r = v.at(0);
+    return r == 2;
+  }
+  catch(...)
+  {
+    return false;
+  }
+}
+bool testElementCheckedOutOfBoundAccess(const char ** pname)
+{
+  *pname = __func__;
+  Vector< int > v;
+  try
+  {
+    v.at(0);
+    return false;
+  }
+  catch (const std::out_of_range & e)
+  {
+    const char * text = e.what();
+    return !std::strcmp("id out of bound", text);
+  }
+  catch(...)
+  {
+    return false;
+  }
+}
+
+bool testCopyConstructor(const char ** pname)
+{
+  *pname = __func__;
+  Vector< int > v(10, 2);
+  v.pushBack(1);
+  v.pushBack(2);
+  Vector< int > yav = v;
+  if (!v.isEmpty() && !yav.isEmpty())
+  {
+    throw std::logic_error("Vectors expected to be non-empty");
+  }
+  bool isEqual = yav.getSize() == v.getSize();
+  for (size_t i = 0; isEqual && i < v.getSize(); i++)
+  {
+    try
+    {
+      isEqual = v.at(i) == yav.at(i);
+    }
+    catch(...)
+    {
+      return false;
+    }
+  }
+  return isEqual;
+}
+
 int main()
 {
   size_t failed = 0;
   using test_t = bool(*)(const char **);
   using case_t = std::pair<test_t, const char *>;
-  case_t tests[] = {
-    {testConstractAndDecstruct, "Vector must be default constructable"},
-    {testDefaultVectorIsEmpty, "Default constructed Vector must be empty"},
-    {testSizeOfEmptyVector, "Size of empty Vector must be zero"},
-    {testSizeOfNonEmptyVector, "Size of non-empty vector must be greater than zero"},
-    {testCapacityOfVector, "Capacity of non-empty vector must be greater than zero"},
-    {testPushBackOfVector, "PushBack is wrong"},
-    {testPopBackOfVector, "PopBack is wrong: size of vector is not the same the expected"}
+    case_t tests[] = {
+        {testConstractAndDecstruct, "Vector must be default constructable"},
+        {testDefaultVectorIsEmpty, "Default constructed Vector must be empty"},
+        {testSizeOfEmptyVector, "Size of empty Vector must be zero"},
+        {testSizeOfNonEmptyVector, "Size of non-empty vector must be greater than zero"},
+        {testCapacityOfVector, "Capacity of non-empty vector must be greater than zero"},
+        {testPushBackOfVector, "PushBack is wrong"},
+        {testPopBackOfVector, "PopBack is wrong: size of vector is not the same the expected"},
+        {testElementCheckedAccess, "Inbound access must return lvalue reference"},
+        {testElementCheckedOutOfBoundAccess, "Out of bound access must generate exception"},
+        {testCopyConstructor, "Copied vector must be equal to original"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
   {
     const char * testName = nullptr;
-    bool r = tests[i].first(&testName);
+    bool r = false;
+    try
+    {
+      r = tests[i].first(&testName);
+    }
+    catch(const std::logic_error & e)
+    {
+      std::cout << "[NOT RUN] " << testName << "\n";
+      std::cout << "\t" << "Reason: " << e.what() << "\n";
+      failed++;
+      continue;
+    }
     if (!r)
     {
       failed++;
