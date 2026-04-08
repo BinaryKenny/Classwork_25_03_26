@@ -128,7 +128,7 @@ bool testCopyConstructor(const char ** pname)
   Vector< int > yav = v;
   if (!v.isEmpty() && !yav.isEmpty())
   {
-    throw std::logic_error("Vectors expected to be non-empty");
+    throw std::out_of_range("id out of bound");
   }
   bool isEqual = yav.getSize() == v.getSize();
   for (size_t i = 0; isEqual && i < v.getSize(); i++)
