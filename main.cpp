@@ -1,6 +1,7 @@
 #include "pevector.hpp"
 #include <iostream>
 #include <cstring>
+#include <math.h>
 using iknk::Vector;
 
 bool testConstractAndDecstruct(const char ** pname)
@@ -213,6 +214,34 @@ bool testMovementOperator(const char ** pname) {
   return v == copy_v;
 }
 
+bool testPushFront(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(10, 2);
+  int value = 1000;
+  int check_value = 67;
+  v.pushBack(check_value);
+  v.pushFront(value);
+  if (v[v.getSize() - 1] != check_value) {
+    return false;
+  }
+  return v[0] == value;
+}
+
+bool testSwapVector(const char ** pname) {
+  *pname = __func__;
+  try {
+    Vector< int > v1(10, 2);
+    Vector< int > v2(6, 7);
+    Vector< int > yav1(v1);
+    Vector< int > yav2(v2);
+    v1.swap(v2);
+    return yav1 == v2 && yav2 == v1;
+  }
+  catch (...) {
+    throw std::logic_error("Bad allocation of member");
+  }
+}
+
 int main()
 {
   size_t failed = 0;
@@ -220,31 +249,34 @@ int main()
   using case_t = std::pair<test_t, const char *>;
   case_t tests[] = {
     {testConstractAndDecstruct, "Vector must be default"
-            " constructable"},
+          " constructable"},
     {testDefaultVectorIsEmpty, "Default constructed"
-            " Vector must be empty"},
+          " Vector must be empty"},
     {testSizeOfEmptyVector, "Size of empty"
-            " Vector must be zero"},
+          " Vector must be zero"},
     {testSizeOfNonEmptyVector, "Size of non-empty"
-            " vector must be greater than zero"},
+          " vector must be greater than zero"},
     {testCapacityOfVector, "Capacity of non-empty"
-            " vector must be greater than zero"},
+          " vector must be greater than zero"},
     {testPushBackOfVector, "PushBack is wrong"},
     {testPopBackOfVector, "PopBack is wrong: size of"
-            " vector is not the same the expected"},
+          " vector is not the same the expected"},
     {testElementCheckedAccess, "Inbound access must"
-            " return lvalue reference"},
+          " return lvalue reference"},
     {testElementCheckedOutOfBoundAccess, "Out of bound access"
-            " must generate exception"},
+          " must generate exception"},
     {testCopyConstructor, "Copied vector must be"
-            " equal to original"},
+          " equal to original"},
     {testElementCheckedConstAccess, "Inbound const access must"
-            " return lvalue reference"},
+          " return lvalue reference"},
     {testElementCheckedOutOfBoundConstAccess, "Out of bound const"
-            " access must generate exception"},
+          " access must generate exception"},
     {testOperatorCopy, "Copied vector must be equal to original"},
     {testMovementConstructor, "Moved vector must be equal to original"},
-    {testMovementOperator, "Moved vector must be equal to original"}
+    {testMovementOperator, "Moved vector must be equal to original"},
+    {testPushFront, "First value must be equal to added value. Also, "
+          " the rest of vector should be the same to vector before changing"},
+    {testSwapVector, "Swap vector must be equal to copy of its original"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
