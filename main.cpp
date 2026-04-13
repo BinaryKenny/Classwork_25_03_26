@@ -47,7 +47,7 @@ bool testCapacityOfVector(const char ** pname)
   try
   {
     Vector<int> v(size, 10);
-    return v.getCapacity() == size;
+    return v.getCapacity() == size * 2;
   }
   catch(...)
   {

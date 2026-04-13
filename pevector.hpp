@@ -10,7 +10,7 @@ namespace iknk
     ~Vector();
     Vector(size_t size, const T & value);
 
-//дописать тесты для операторов копирования и перемещения, pushFront(), swap()
+//дописать тесты для операторов копирования и перемещения, pushFront(), swap() - DONE
       
 //использовать Copy-and-Swap
       
@@ -67,7 +67,7 @@ template<class T>
 iknk::Vector<T>::Vector(size_t size):
   data(size ? new T[size] : nullptr),
   size_(size),
-  capacity(size)
+  capacity(size * 2)
 {}
 
 template<class T>
@@ -184,6 +184,34 @@ iknk::Vector<T>::Vector(size_t size, const T & value):
   {
     data[i] = value;
   }
+}
+
+template<class T>
+void iknk::Vector<T>::insert(size_t id, const T &t) {
+  T * new_data = nullptr;
+  try {
+    new_data = new T[capacity * 2];
+  }
+  catch (...) {
+    throw std::bad_alloc();
+  }
+  capacity *= 2;
+  for (size_t i = 0; i < size_ + 1; i++) {
+    try {
+      if (i != id) {
+        new_data[i] = data[i];
+      }
+      else {
+        new_data[i] = t;
+      }
+    } catch (...) {
+      delete new_data;
+      throw std::logic_error("Some problems with inserting");
+    }
+  }
+  size_++;
+  delete [] data;
+  data = new_data;
 }
 
 template<class T>
