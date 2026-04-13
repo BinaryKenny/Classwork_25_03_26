@@ -24,7 +24,7 @@ namespace iknk
 //Реализовать итераторы вектора(random access), const and non-const (их не тестировать)
 //Еще придумать по 3 insert/erase с итераторами
     Vector(const Vector<T> & rhs);
-    Vector(const Vector<T> && rhs) noexcept;
+    Vector(Vector<T> && rhs) noexcept;
     Vector<T> & operator=(const Vector<T> & rhs);
     Vector<T> & operator=(Vector<T> && rhs) noexcept;
     bool isEmpty() const noexcept;
@@ -93,7 +93,7 @@ iknk::Vector<T> & iknk::Vector<T>::operator=(const Vector<T> & rhs)
 }
 
 template<class T>
-iknk::Vector<T>::Vector(const iknk::Vector<T> && rhs) noexcept:
+iknk::Vector<T>::Vector(Vector<T> && rhs) noexcept:
 data(rhs.data),
 size_(rhs.size_),
 capacity(rhs.capacity)

@@ -198,6 +198,21 @@ bool testOperatorCopy(const char ** pname) {
   }
 }
 
+bool testMovementConstructor(const char ** pname) {
+  *pname = __func__;
+  Vector < int > v (Vector< int >(10, 2));
+  Vector < int > copy_v(10, 2);
+  return v == copy_v;
+}
+
+bool testMovementOperator(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v (Vector< int >(10, 2));
+  v = Vector< int >(9, 8);
+  Vector< int > copy_v(9, 8);
+  return v == copy_v;
+}
+
 int main()
 {
   size_t failed = 0;
@@ -227,7 +242,9 @@ int main()
             " return lvalue reference"},
     {testElementCheckedOutOfBoundConstAccess, "Out of bound const"
             " access must generate exception"},
-    {testOperatorCopy, "Copied vector must be equal to original"}
+    {testOperatorCopy, "Copied vector must be equal to original"},
+    {testMovementConstructor, "Moved vector must be equal to original"},
+    {testMovementOperator, "Moved vector must be equal to original"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
