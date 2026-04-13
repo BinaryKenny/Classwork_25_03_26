@@ -183,35 +183,51 @@ bool testCopyConstructor(const char ** pname)
   return isEqual;
 }
 
+bool testOperatorCopy(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v1(10, 2);
+  Vector < int > v2(9, 5);
+  try {
+    v1 = v2;
+    if (v1 == v2) {
+      return true;
+    }
+  }
+  catch (...) {
+    return false;
+  }
+}
+
 int main()
 {
   size_t failed = 0;
   using test_t = bool(*)(const char **);
   using case_t = std::pair<test_t, const char *>;
-    case_t tests[] = {
-        {testConstractAndDecstruct, "Vector must be default"
+  case_t tests[] = {
+    {testConstractAndDecstruct, "Vector must be default"
             " constructable"},
-        {testDefaultVectorIsEmpty, "Default constructed"
+    {testDefaultVectorIsEmpty, "Default constructed"
             " Vector must be empty"},
-        {testSizeOfEmptyVector, "Size of empty"
+    {testSizeOfEmptyVector, "Size of empty"
             " Vector must be zero"},
-        {testSizeOfNonEmptyVector, "Size of non-empty"
+    {testSizeOfNonEmptyVector, "Size of non-empty"
             " vector must be greater than zero"},
-        {testCapacityOfVector, "Capacity of non-empty"
+    {testCapacityOfVector, "Capacity of non-empty"
             " vector must be greater than zero"},
-        {testPushBackOfVector, "PushBack is wrong"},
-        {testPopBackOfVector, "PopBack is wrong: size of"
+    {testPushBackOfVector, "PushBack is wrong"},
+    {testPopBackOfVector, "PopBack is wrong: size of"
             " vector is not the same the expected"},
-        {testElementCheckedAccess, "Inbound access must"
+    {testElementCheckedAccess, "Inbound access must"
             " return lvalue reference"},
-        {testElementCheckedOutOfBoundAccess, "Out of bound access"
+    {testElementCheckedOutOfBoundAccess, "Out of bound access"
             " must generate exception"},
-        {testCopyConstructor, "Copied vector must be"
+    {testCopyConstructor, "Copied vector must be"
             " equal to original"},
-        {testElementCheckedConstAccess, "Inbound const access must"
+    {testElementCheckedConstAccess, "Inbound const access must"
             " return lvalue reference"},
-        {testElementCheckedOutOfBoundConstAccess, "Out of bound const"
-            " access must generate exception"}
+    {testElementCheckedOutOfBoundConstAccess, "Out of bound const"
+            " access must generate exception"},
+    {testOperatorCopy, "Copied vector must be equal to original"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)

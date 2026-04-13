@@ -1,6 +1,5 @@
 #ifndef PE_VECTOR_HPP
 #define PE_VECTOR_HPP
-#include <cstddef>
 #include <stdexcept>
 #include <utility>
 namespace iknk
@@ -11,8 +10,21 @@ namespace iknk
     ~Vector();
     Vector(size_t size, const T & value);
 
+//дописать тесты для операторов копирования и перемещения, pushFront(), swap()
+      
+//использовать Copy-and-Swap
+      
+    //реализовать и протестировать
+    void insert(size_t id, const T & t);
+    void insert(size_t id, const Vector<T> & rhs, size_t beg, size_t end);
+    void erase(size_t id);
+    void erase(size_t beg, size_t end);
+ 
+//ДОМАШНЯЯ РАБОТА
+//Реализовать итераторы вектора(random access), const and non-const (их не тестировать)
+//Еще придумать по 3 insert/erase с итераторами
     Vector(const Vector<T> & rhs);
-    Vector(const Vector<T> && rhs);
+    Vector(const Vector<T> && rhs) noexcept;
     Vector<T> & operator=(const Vector<T> & rhs);
     Vector<T> & operator=(Vector<T> && rhs) noexcept;
     bool isEmpty() const noexcept;
@@ -29,6 +41,7 @@ namespace iknk
     const T & operator[](size_t id) const noexcept;
     T & at(size_t id);
     const T & at(size_t id) const;
+    bool operator==(const Vector<T> & rhs) const noexcept;
 
     private:
       explicit Vector(size_t size);
@@ -38,7 +51,49 @@ namespace iknk
 }
 
 template<class T>
-iknk::Vector<T> & iknk::Vector<T>(const iknk::Vector<T> && rhs) noexcept:
+iknk::Vector<T>::Vector():
+  data(nullptr),
+  size_(0),
+  capacity(0)
+{}
+
+template <class T>
+iknk::Vector<T>::~Vector()
+{
+  delete [] data;
+}
+
+template<class T>
+iknk::Vector<T>::Vector(size_t size):
+  data(size ? new T[size] : nullptr),
+  size_(size),
+  capacity(size)
+{}
+
+template<class T>
+iknk::Vector<T>::Vector(const Vector<T> & rhs):
+  Vector(rhs.getSize())
+{
+  for (size_t i = 0; i < rhs.getSize(); i++)
+  {
+    data[i] = rhs.data[i];
+  }
+}
+
+template<class T>
+iknk::Vector<T> & iknk::Vector<T>::operator=(const Vector<T> & rhs)
+{
+  if (this == std::addressof(rhs))   //для взятия именно адреса
+  {
+    return *this;
+  }
+  Vector<T> cpy(rhs);
+  swap(cpy);
+  return *this;
+}
+
+template<class T>
+iknk::Vector<T>::Vector(const iknk::Vector<T> && rhs) noexcept:
 data(rhs.data),
 size_(rhs.size_),
 capacity(rhs.capacity)
@@ -46,7 +101,7 @@ capacity(rhs.capacity)
   rhs.data = nullptr;
 }
 template<class T>
-iknk::Vector<T> & iknk::Vector<T>::operator(Vector<T> && rhs) noexcept
+iknk::Vector<T> & iknk::Vector<T>::operator=(Vector<T> && rhs) noexcept
 {
   if (this == &rhs)
   {
@@ -71,21 +126,11 @@ void iknk::Vector<T>::pushFront(const T & t)
 }
 
 template<class T>
-void iknk::Vector<T>::swap(Vector<T> & rhs) noexcept
+void iknk::Vector<T>::swap(Vector & rhs) noexcept
 {
   std::swap(data, rhs.data);
   std::swap(size_, rhs.size_);
   std::swap(capacity, rhs.capacity);
-}
-
-template<class T>
-iknk::Vector<T> & iknk::Vector<T>(const Vector<T> & rhs):
-  Vector(rhs.getSize())
-{
-  for (size_t i = 0; i < rhs.getSize(); i++)
-  {
-    data[i] = rhs.data[i];
-  }
 }
 
 template<class T>
@@ -142,37 +187,6 @@ iknk::Vector<T>::Vector(size_t size, const T & value):
 }
 
 template<class T>
-iknk::Vector<T> & iknk::Vector<T>::operator=(const Vector<T> & rhs)
-{
-  if (this == std::adressof(rhs))   //для взятия именно адреса
-  {
-    return *this;
-  }
-  Vector<T> cpy(rhs);
-  swap(cpy);
-  return *this;
-}
-
-template<class T>
-iknk::Vector<T>::Vector():
-  data(nullptr),
-  size_(0),
-  capacity(0)
-{}
-template <class T>
-iknk::Vector<T>::~Vector()
-{
-  delete [] data;
-}
-
-template<class T>
-iknk::Vector<T>::Vector(size_t size):
-  data(size ? new T[size] : nullptr),
-  size_(size),
-  capacity(size)
-{}
-
-template<class T>
 size_t iknk::Vector<T>::getCapacity() const noexcept
 {
   return capacity;
@@ -212,5 +226,19 @@ void iknk::Vector<T>::popBack()
     throw std::logic_error("Logic error: vector is empty");
   }
   size_--;
+}
+
+template<class T>
+bool iknk::Vector<T>::operator==(const Vector<T> & rhs) const noexcept
+{
+  if (getSize() != rhs.getSize()) {
+    return false;
+  }
+  for (size_t i = 0; i < getSize(); i++) {
+    if (data[i] != rhs.data[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 #endif
