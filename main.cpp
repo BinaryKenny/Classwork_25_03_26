@@ -257,6 +257,25 @@ bool testSingleInsert(const char ** pname) {
   }
 }
 
+bool testSegmentInsert(const char ** pname) {
+  *pname = __func__;
+  int expected[] = {0,1,2,5,6,7,8,9,3,4,5,6,7,8,9};
+  Vector< int > v(10, 0);
+  for (size_t i = 1; i < 10; i++) {
+    v[i] = i;
+  }
+  v.insert(3, v, 5, 10);
+  if (v.getSize() != 15) {
+    return false;
+  }
+  for (size_t i = 0; i < v.getSize(); i++) {
+    if (expected[i] != v[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 int main()
 {
   size_t failed = 0;
@@ -293,6 +312,7 @@ int main()
           " the rest of vector should be the same to vector before changing"},
     {testSwapVector, "Swaped vector must be equal to copy of its original"},
     {testSingleInsert, "Inserted value under the id must be equal to the added value"},
+    {testSegmentInsert, "Inserted value under the id must be equal to the added value"},
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)

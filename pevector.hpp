@@ -9,10 +9,6 @@ namespace iknk
     Vector();
     ~Vector();
     Vector(size_t size, const T & value);
-
-//дописать тесты для операторов копирования и перемещения, pushFront(), swap() - DONE
-      
-//использовать Copy-and-Swap
       
     //реализовать и протестировать
     void insert(size_t id, const T & t);
@@ -65,7 +61,7 @@ iknk::Vector<T>::~Vector()
 
 template<class T>
 iknk::Vector<T>::Vector(size_t size):
-  data(size ? new T[size] : nullptr),
+  data(size ? new T[size * 2] : nullptr),
   size_(size),
   capacity(size * 2)
 {}
@@ -212,6 +208,46 @@ void iknk::Vector<T>::insert(size_t id, const T &t) {
   size_++;
   delete [] data;
   data = new_data;
+}
+
+template<class T>
+void iknk::Vector<T>::insert(size_t id, const Vector<T> &rhs, size_t beg, size_t end) {
+  size_t sizeOfSegment = end - beg;
+  T * segment = new T[sizeOfSegment]();
+  if (rhs == *this) {
+    for (size_t i = 0; i < sizeOfSegment; i++) {
+      segment[i] = data[beg + i];
+    }
+  }
+  else {
+    for (size_t i = 0; i < sizeOfSegment; i++) {
+      segment[i] = rhs.data[beg + i];
+    }
+  }
+  T * new_data = nullptr;
+  size_t new_capacity = capacity;
+  if (size_ + sizeOfSegment > capacity) {
+    new_capacity = capacity * 2;
+  }
+  try {
+    new_data = new T[new_capacity];
+    capacity *= 2;
+  }
+  catch (...) {
+    throw std::bad_alloc();
+  }
+  for (size_t i = 0; i < id; i++) {
+    new_data[i] = data[i];
+  }
+  for (size_t i = id; i < end + id - beg; i++) {
+    new_data[i] = segment[i - id];
+  }
+  for (size_t i = end + id - beg; i < size_ + sizeOfSegment; i++) {
+    new_data[i] = data[i - end + beg];
+  }
+  delete [] data;
+  data = new_data;
+  size_ = size_ + sizeOfSegment;
 }
 
 template<class T>
