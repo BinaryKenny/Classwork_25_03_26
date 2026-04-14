@@ -276,6 +276,28 @@ bool testSegmentInsert(const char ** pname) {
   return true;
 }
 
+bool testSingleErase(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v;
+  try {
+    v.pushBack(9);
+    v.pushBack(72);
+    v.pushBack(67);
+    v.pushBack(76);
+    v.erase(2);
+  }
+  catch (...) {
+    throw std::logic_error("Exception of pushBack (bad alloc)");
+  }
+  if (v[2] == 67) {
+    return false;
+  }
+  if (v.getSize() == 3) {
+    return true;
+  }
+  return false;
+}
+
 int main()
 {
   size_t failed = 0;
@@ -313,6 +335,7 @@ int main()
     {testSwapVector, "Swaped vector must be equal to copy of its original"},
     {testSingleInsert, "Inserted value under the id must be equal to the added value"},
     {testSegmentInsert, "Inserted value under the id must be equal to the added value"},
+    {testSingleErase, "Erase must delete a value under the id and decrease vector size "}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)

@@ -251,6 +251,20 @@ void iknk::Vector<T>::insert(size_t id, const Vector<T> &rhs, size_t beg, size_t
 }
 
 template<class T>
+void iknk::Vector<T>::erase(size_t id) {
+  T * new_data = new T[capacity];
+  for (size_t i = 0; i < size_; i++) {
+    if (i == id) {
+      continue;
+    }
+    new_data[i] = data[i];
+  }
+  delete [] data;
+  data = new_data;
+  size_--;
+}
+
+template<class T>
 size_t iknk::Vector<T>::getCapacity() const noexcept
 {
   return capacity;
@@ -264,8 +278,8 @@ void iknk::Vector<T>::pushBack(const T & value)
     T * new_data = nullptr;
     try
     {
-      new_data = new T[capacity * 2];
-      capacity *= 2;
+      new_data = new T[capacity * 2 + 1];
+      capacity = capacity * 2 + 1;
       for (size_t i = 0; i < size_; i++)
       {
         new_data[i] = data[i];
