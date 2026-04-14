@@ -242,6 +242,21 @@ bool testSwapVector(const char ** pname) {
   }
 }
 
+bool testSingleInsert(const char ** pname) {
+  *pname = __func__;
+  try {
+    Vector< int > v(10, 2);
+    v.pushBack(67);
+    v.insert(3, 10);
+    if (v[3] == 10 && v[v.getSize() - 1] != 67) {
+      return true;
+    }
+  }
+  catch (...) {
+    throw std::logic_error("Exception of inserting");
+  }
+}
+
 int main()
 {
   size_t failed = 0;
@@ -276,7 +291,8 @@ int main()
     {testMovementOperator, "Moved vector must be equal to original"},
     {testPushFront, "First value must be equal to added value. Also, "
           " the rest of vector should be the same to vector before changing"},
-    {testSwapVector, "Swap vector must be equal to copy of its original"}
+    {testSwapVector, "Swaped vector must be equal to copy of its original"},
+    {testSingleInsert, "Inserted value under the id must be equal to the added value"},
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
