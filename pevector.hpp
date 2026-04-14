@@ -265,6 +265,21 @@ void iknk::Vector<T>::erase(size_t id) {
 }
 
 template<class T>
+void iknk::Vector<T>::erase(size_t beg, size_t end) {
+  T * new_data = new T[capacity];
+  size_t id = 0;
+  for (size_t i = 0; i < size_; i++) {
+    if (i < beg || i >= end) {
+      new_data[id] = data[i];
+      id++;
+    }
+  }
+  delete [] data;
+  data = new_data;
+  size_ = size_ - (end - beg);
+}
+
+template<class T>
 size_t iknk::Vector<T>::getCapacity() const noexcept
 {
   return capacity;

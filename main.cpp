@@ -298,6 +298,24 @@ bool testSingleErase(const char ** pname) {
   return false;
 }
 
+bool testSegmentErase(const char ** pname) {
+  *pname = __func__;
+  Vector < int > v(10,0);
+  int expected[] = {0, 1, 2, 3, 4, 8, 9};
+  for (size_t i = 1; i < v.getSize(); i++) {
+    v[i] = i;
+  }
+  size_t beg = 5;
+  size_t end = 8;
+  v.erase(beg, end);
+  for (size_t i = 0; i < v.getSize(); i++) {
+    if (v[i] != expected[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 int main()
 {
   size_t failed = 0;
@@ -335,7 +353,8 @@ int main()
     {testSwapVector, "Swaped vector must be equal to copy of its original"},
     {testSingleInsert, "Inserted value under the id must be equal to the added value"},
     {testSegmentInsert, "Inserted value under the id must be equal to the added value"},
-    {testSingleErase, "Erase must delete a value under the id and decrease vector size "}
+    {testSingleErase, "Erase must delete a value under the id and decrease vector size "},
+    {testSegmentErase, "Erase must delete a segment of vector"},
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
