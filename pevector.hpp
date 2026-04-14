@@ -26,8 +26,17 @@ namespace iknk
 
     void insert(size_t id, const T & t);
     void insert(size_t id, const Vector<T> & rhs, size_t beg, size_t end);
+
+    void insert(Iterator<T> pos, const T & value);
+    void insert(Iterator<T> pos, CIterator<T> begin, CIterator<T> end);
+    void insert(Iterator< T > pos, const T & value, size_t k);
+
     void erase(size_t id);
     void erase(size_t beg, size_t end);
+
+    void erase(Iterator< T > pos);
+    void erase(Iterator< T > begin, Iterator< T > end);
+    void erase(Iterator< T > begin, size_t k);
  
 //ДОМАШНЯЯ РАБОТА
 //Реализовать итераторы вектора(random access), const and non-const (их не тестировать)
@@ -64,9 +73,10 @@ namespace iknk
     ~Iterator() = default;
     Iterator< T > operator+(size_t i);
     Iterator< T > operator-(size_t i);
-    void write(Iterator< T > & it);
-  private:
-    Vector<T> vector;
+    void write(Iterator< T > & it, const T & value);
+    void cut(Iterator< T > & it);
+
+    Vector<T> & vector;
     size_t id;
   };
 
@@ -77,7 +87,7 @@ namespace iknk
     CIterator< T > operator+(size_t i);
     CIterator< T > operator-(size_t i);
     T read(CIterator< T > & it);
-  private:
+
     Vector< T > vector;
     size_t id;
   };
@@ -126,6 +136,17 @@ iknk::Iterator< T > iknk::Iterator<T>::operator-(size_t i) {
 }
 
 template<class T>
+void iknk::Iterator<T>::write(Iterator<T> &it, const T &value) {
+  it.vector[id] = value;
+}
+
+template<class T>
+void iknk::Iterator<T>::cut(Iterator<T> &it) {
+  vector.erase(it.id);
+}
+
+
+template<class T>
 iknk::CIterator<T>::CIterator(Vector<T> & v, size_t i):
 vector(v),
 id(i)
@@ -145,6 +166,11 @@ iknk::CIterator<T> iknk::CIterator<T>::operator-(size_t i) {
     throw std::out_of_range("Const Iterator is out of bound");
   }
   return CIterator<T>(vector, id - i);
+}
+
+template<class T>
+T iknk::CIterator<T>::read(CIterator<T> &it) {
+  return it.vector[id];
 }
 
 
@@ -297,13 +323,14 @@ iknk::CIterator<T> iknk::Vector<T>::citerator(size_t i) {
 template<class T>
 void iknk::Vector<T>::insert(size_t id, const T &t) {
   T * new_data = nullptr;
+  size_t new_capacity = size_ + 1 > capacity ? capacity * 2 + 1 : capacity;
   try {
-    new_data = new T[capacity * 2];
+    new_data = new T[new_capacity];
   }
   catch (...) {
     throw std::bad_alloc();
   }
-  capacity *= 2;
+  capacity = new_capacity;
   for (size_t i = 0; i < size_ + 1; i++) {
     try {
       if (i != id) {
@@ -326,19 +353,62 @@ template<class T>
 void iknk::Vector<T>::insert(size_t id, const Vector<T> &rhs, size_t beg, size_t end) {
   size_t sizeOfSegment = end - beg;
   T * segment = new T[sizeOfSegment]();
-  if (rhs == *this) {
-    for (size_t i = 0; i < sizeOfSegment; i++) {
-      segment[i] = data[beg + i];
+  T * new_data = nullptr;
+  try {
+    if (rhs == *this) {
+      for (size_t i = 0; i < sizeOfSegment; i++) {
+        segment[i] = data[beg + i];
+      }
+    }
+    else {
+      for (size_t i = 0; i < sizeOfSegment; i++) {
+        segment[i] = rhs.data[beg + i];
+      }
+    }
+    size_t new_capacity = capacity;
+    if (size_ + sizeOfSegment > capacity) {
+      new_capacity = capacity * 2;
+    }
+    try {
+      new_data = new T[new_capacity];
+      capacity *= 2;
+    }
+    catch (...) {
+      throw std::bad_alloc();
+    }
+    for (size_t i = 0; i < id; i++) {
+      new_data[i] = data[i];
+    }
+    for (size_t i = id; i < end + id - beg; i++) {
+      new_data[i] = segment[i - id];
+    }
+    for (size_t i = end + id - beg; i < size_ + sizeOfSegment; i++) {
+      new_data[i] = data[i - end + beg];
     }
   }
-  else {
-    for (size_t i = 0; i < sizeOfSegment; i++) {
-      segment[i] = rhs.data[beg + i];
-    }
+  catch (...) {
+    throw std::logic_error("Some problems with coping (it isn't method's exception)");
   }
+  delete [] data;
+  data = new_data;
+  size_ = size_ + sizeOfSegment;
+}
+
+template<class T>
+void iknk::Vector<T>::insert(Iterator<T> pos, const T & value) {
+  pos.vector.insert(pos.id, value);
+}
+
+template<class T>
+void iknk::Vector<T>::insert(Iterator<T> pos, CIterator<T> begin, CIterator<T> end) {
+  pos.vector.insert(pos.id, begin.vector, begin.id, end.id);
+}
+
+template<class T>
+void iknk::Vector<T>::insert(Iterator<T> pos, const T & value, size_t k) {
   T * new_data = nullptr;
   size_t new_capacity = capacity;
-  if (size_ + sizeOfSegment > capacity) {
+  if (k + size_ > capacity) {
     new_capacity = capacity * 2;
   }
   try {
@@ -348,18 +418,18 @@ void iknk::Vector<T>::insert(size_t id, const Vector<T> &rhs, size_t beg, size_t
   catch (...) {
     throw std::bad_alloc();
   }
-  for (size_t i = 0; i < id; i++) {
+  for (size_t i = 0; i < pos.id; i++) {
     new_data[i] = data[i];
   }
-  for (size_t i = id; i < end + id - beg; i++) {
-    new_data[i] = segment[i - id];
+  for (size_t i = pos.id; i < pos.id + k; i++) {
+    new_data[i] = value;
   }
-  for (size_t i = end + id - beg; i < size_ + sizeOfSegment; i++) {
-    new_data[i] = data[i - end + beg];
+  for (size_t i = pos.id + k; i < size_ + k; i++) {
+    new_data[i] = data[i - k];
   }
+  size_ += k;
   delete [] data;
   data = new_data;
-  size_ = size_ + sizeOfSegment;
 }
 
 template<class T>

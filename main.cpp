@@ -3,6 +3,8 @@
 #include <cstring>
 #include <math.h>
 using iknk::Vector;
+using iknk::Iterator;
+using iknk::CIterator;
 
 bool testConstractAndDecstruct(const char ** pname)
 {
@@ -316,6 +318,47 @@ bool testSegmentErase(const char ** pname) {
   return true;
 }
 
+bool testSingleIteratorInsert(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(7, 2);
+  Iterator< int > pos = v.iterator(5);
+  pos.vector.insert(pos, 34);
+  if (v[pos.id] == 34 && v.getSize() == 8) {
+    return true;
+  }
+  return false;
+}
+
+bool testSegmentIteratorInsert(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(12, 2);
+  Vector< int > yav;
+  yav.pushBack(34);
+  yav.pushBack(67);
+  yav.pushBack(76);
+  yav.pushBack(43);
+  Iterator< int > pos = v.iterator(4);
+  CIterator< int > beg = yav.citerator(1);
+  CIterator< int > end = yav.citerator(3);
+  v.insert(pos, beg, end);
+  if (v.getSize() == 14 && v[4] == 67 && v[5] == 76) {
+    return true;
+  }
+  return false;
+}
+
+bool testRepetitiveInsert(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(7, 2);
+  Iterator< int > pos = v.iterator(5);
+  v.insert(pos, 34, 4);
+  if (v[pos.id] == 34 && v.getSize() == 11) {
+    return true;
+  }
+  return false;
+}
+
+
 int main()
 {
   size_t failed = 0;
@@ -355,6 +398,9 @@ int main()
     {testSegmentInsert, "Inserted value under the id must be equal to the added value"},
     {testSingleErase, "Erase must delete a value under the id and decrease vector size "},
     {testSegmentErase, "Erase must delete a segment of vector"},
+    {testSingleIteratorInsert, "Unbound iterator must have the added value"},
+    {testSegmentIteratorInsert, "Unbound iterator must have the added values and bigger size then before"},
+    {testRepetitiveInsert, "Unbound iterarot must have the added value and vector must be bigger then before"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
