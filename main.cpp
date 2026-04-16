@@ -199,6 +199,7 @@ bool testOperatorCopy(const char ** pname) {
   catch (...) {
     return false;
   }
+  return false;
 }
 
 bool testMovementConstructor(const char ** pname) {
@@ -250,12 +251,29 @@ bool testSingleInsert(const char ** pname) {
     Vector< int > v(10, 2);
     v.pushBack(67);
     v.insert(3, 10);
-    if (v[3] == 10 && v[v.getSize() - 1] != 67) {
+    if (v[3] == 10 && v[v.getSize() - 1] == 67) {
       return true;
     }
   }
   catch (...) {
     throw std::logic_error("Exception of inserting");
+  }
+  return false;
+}
+
+bool testErrorSingleInsert(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(5, 0);
+  try {
+    v.insert(10, 67);
+    return false;
+  }
+  catch (std::out_of_range & e) {
+    const char * text = e.what();
+    return !std::strcmp("id out of bound", text);
+  }
+  catch (...) {
+    return false;
   }
 }
 
@@ -278,19 +296,30 @@ bool testSegmentInsert(const char ** pname) {
   return true;
 }
 
+bool testErrorSegmentInsert(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(10, 0);
+  try {
+    v.insert(11, v, 5, 10);
+    return false;
+  }
+  catch (const std::out_of_range & e) {
+    const char * text = e.what();
+    return !std::strcmp("id out of bound", text);
+  }
+  catch (...) {
+    return false;
+  }
+}
+
 bool testSingleErase(const char ** pname) {
   *pname = __func__;
   Vector< int > v;
-  try {
-    v.pushBack(9);
-    v.pushBack(72);
-    v.pushBack(67);
-    v.pushBack(76);
-    v.erase(2);
-  }
-  catch (...) {
-    throw std::logic_error("Exception of pushBack (bad alloc)");
-  }
+  v.pushBack(9);
+  v.pushBack(72);
+  v.pushBack(67);
+  v.pushBack(76);
+  v.erase(2);
   if (v[2] == 67) {
     return false;
   }
@@ -298,6 +327,22 @@ bool testSingleErase(const char ** pname) {
     return true;
   }
   return false;
+}
+
+bool testErrorSingleErase(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(4, 0);
+  try {
+    v.erase(4);
+    return false;
+  }
+  catch (const std::out_of_range & e) {
+    const char * text = e.what();
+    return !std::strcmp("id out of bound", text);
+  }
+  catch (...) {
+    return false;
+  }
 }
 
 bool testSegmentErase(const char ** pname) {
@@ -316,6 +361,24 @@ bool testSegmentErase(const char ** pname) {
     }
   }
   return true;
+}
+
+bool testErrorSegmentErase(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v(10, 0);
+  size_t beg = 5;
+  size_t end = 11;
+  try {
+    v.erase(beg, end);
+    return false;
+  }
+  catch (const std::out_of_range & e) {
+    const char * text = e.what();
+    return !std::strcmp("id is out of bound", text);
+  }
+  catch (...) {
+    return false;
+  }
 }
 
 bool testSingleIteratorInsert(const char ** pname) {
@@ -358,6 +421,44 @@ bool testRepetitiveInsert(const char ** pname) {
   return false;
 }
 
+bool testSingleIteratorErase(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v;
+  int expected[] = {67, 76, 43};
+  v.pushBack(34);
+  v.pushBack(67);
+  v.pushBack(76);
+  v.pushBack(43);
+  auto iter = v.begin();
+  v.erase(iter);
+  for (size_t i = 0; i < v.getSize() - 1; i++) {
+    if (expected[i] != v[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool testSegmentIteratorErase(const char ** pname) {
+  *pname = __func__;
+  Vector< int > v;
+  int expected[] = {34, 67, 69};
+  v.pushBack(34);
+  v.pushBack(67);
+  v.pushBack(76);
+  v.pushBack(43);
+  v.pushBack(100);
+  v.pushBack(69);
+  auto beg = v.iterator(2);
+  auto end = v.iterator(5);
+  v.erase(beg, end);
+  for (size_t i = 0; i < v.getSize() - 1; i++) {
+    if (expected[i] != v[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 int main()
 {
@@ -395,12 +496,18 @@ int main()
           " the rest of vector should be the same to vector before changing"},
     {testSwapVector, "Swaped vector must be equal to copy of its original"},
     {testSingleInsert, "Inserted value under the id must be equal to the added value"},
+    {testErrorSingleInsert, "If ID > size it must throw the exception"},
     {testSegmentInsert, "Inserted value under the id must be equal to the added value"},
+    {testErrorSegmentInsert, "If ID > size it must throw the exception"},
     {testSingleErase, "Erase must delete a value under the id and decrease vector size "},
+    {testErrorSingleErase, "If ID bigger than size it must throw the exception"},
     {testSegmentErase, "Erase must delete a segment of vector"},
+    {testErrorSegmentErase, "If ID > size it must throw the exception"},
     {testSingleIteratorInsert, "Unbound iterator must have the added value"},
     {testSegmentIteratorInsert, "Unbound iterator must have the added values and bigger size then before"},
-    {testRepetitiveInsert, "Unbound iterarot must have the added value and vector must be bigger then before"}
+    {testRepetitiveInsert, "Unbound iterator must have the added value and vector must be bigger then before"},
+    {testSingleIteratorErase, "Erase must delete a value that indicated by iterator"},
+    {testSegmentIteratorErase, "Erase must delete the segment that indicated by iterators"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)

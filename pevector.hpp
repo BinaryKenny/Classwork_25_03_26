@@ -36,11 +36,8 @@ namespace iknk
 
     void erase(Iterator< T > pos);
     void erase(Iterator< T > begin, Iterator< T > end);
-    void erase(Iterator< T > begin, size_t k);
- 
-//ДОМАШНЯЯ РАБОТА
-//Реализовать итераторы вектора(random access), const and non-const (их не тестировать)
-//Еще придумать по 3 insert/erase с итераторами
+    void erase(CIterator< T > begin, size_t k);
+
     Vector(const Vector<T> & rhs);
     Vector(Vector<T> && rhs) noexcept;
     Vector<T> & operator=(const Vector<T> & rhs);
@@ -88,7 +85,7 @@ namespace iknk
     CIterator< T > operator-(size_t i);
     T read(CIterator< T > & it);
 
-    Vector< T > vector;
+    Vector< T > & vector;
     size_t id;
   };
 }
@@ -108,7 +105,7 @@ iknk::Vector<T>::~Vector()
 
 template<class T>
 iknk::Vector<T>::Vector(size_t size):
-  data(size ? new T[size * 2] : nullptr),
+  data(size ? new T[size * 2]() : nullptr),
   size_(size),
   capacity(size * 2)
 {}
@@ -321,77 +318,55 @@ iknk::CIterator<T> iknk::Vector<T>::citerator(size_t i) {
 }
 
 template<class T>
-void iknk::Vector<T>::insert(size_t id, const T &t) {
-  T * new_data = nullptr;
-  size_t new_capacity = size_ + 1 > capacity ? capacity * 2 + 1 : capacity;
-  try {
-    new_data = new T[new_capacity];
+void iknk::Vector<T>::insert(size_t id, const T & t) {
+  if (id > size_ - 1) {
+    throw std::out_of_range("id out of bound");
   }
-  catch (...) {
-    throw std::bad_alloc();
-  }
-  capacity = new_capacity;
+  Vector< T > new_vec(size_ + 1);
+  size_t index = 0;
   for (size_t i = 0; i < size_ + 1; i++) {
     try {
-      if (i != id) {
-        new_data[i] = data[i];
+      if (i == id) {
+        new_vec[i] = t;
       }
       else {
-        new_data[i] = t;
+        new_vec[i] = (*this)[index];
+        index++;
       }
-    } catch (...) {
-      delete new_data;
-      throw std::logic_error("Some problems with inserting");
-    }
-  }
-  size_++;
-  delete [] data;
-  data = new_data;
-}
-
-template<class T>
-void iknk::Vector<T>::insert(size_t id, const Vector<T> &rhs, size_t beg, size_t end) {
-  size_t sizeOfSegment = end - beg;
-  T * segment = new T[sizeOfSegment]();
-  T * new_data = nullptr;
-  try {
-    if (rhs == *this) {
-      for (size_t i = 0; i < sizeOfSegment; i++) {
-        segment[i] = data[beg + i];
-      }
-    }
-    else {
-      for (size_t i = 0; i < sizeOfSegment; i++) {
-        segment[i] = rhs.data[beg + i];
-      }
-    }
-    size_t new_capacity = capacity;
-    if (size_ + sizeOfSegment > capacity) {
-      new_capacity = capacity * 2;
-    }
-    try {
-      new_data = new T[new_capacity];
-      capacity *= 2;
     }
     catch (...) {
       throw std::bad_alloc();
     }
+  }
+  swap(new_vec);
+}
+
+template<class T>
+void iknk::Vector<T>::insert(size_t id, const Vector<T> &rhs, size_t beg, size_t end) {
+  if (id > size_ - 1) {
+    throw std::out_of_range("id out of bound");
+  }
+  size_t sizeOfSegment = end - beg;
+  Vector< T > segment(sizeOfSegment);
+  Vector< T > result(size_ + sizeOfSegment);
+  try {
+    for (size_t i = 0; i < sizeOfSegment; i++) {
+      segment[i] = rhs[beg + i];
+    }
     for (size_t i = 0; i < id; i++) {
-      new_data[i] = data[i];
+      result[i] = rhs[i];
     }
-    for (size_t i = id; i < end + id - beg; i++) {
-      new_data[i] = segment[i - id];
+    for (size_t i = id; i < id + sizeOfSegment; i++) {
+      result[i] = segment[i - id];
     }
-    for (size_t i = end + id - beg; i < size_ + sizeOfSegment; i++) {
-      new_data[i] = data[i - end + beg];
+    for (size_t i = id + sizeOfSegment; i < size_ + sizeOfSegment; i++) {
+      result[i] = rhs[i - sizeOfSegment];
     }
   }
   catch (...) {
-    throw std::logic_error("Some problems with coping (it isn't method's exception)");
+    throw std::bad_alloc();
   }
-  delete [] data;
-  data = new_data;
-  size_ = size_ + sizeOfSegment;
+  swap(result);
 }
 
 template<class T>
@@ -406,59 +381,105 @@ void iknk::Vector<T>::insert(Iterator<T> pos, CIterator<T> begin, CIterator<T> e
 
 template<class T>
 void iknk::Vector<T>::insert(Iterator<T> pos, const T & value, size_t k) {
-  T * new_data = nullptr;
-  size_t new_capacity = capacity;
-  if (k + size_ > capacity) {
-    new_capacity = capacity * 2;
-  }
+  Vector< T > copy_v(size_ + k);
   try {
-    new_data = new T[new_capacity];
-    capacity *= 2;
+    for (size_t i = 0; i < pos.id; i++) {
+      copy_v[i] = (*this)[i];
+    }
+    for (size_t i = pos.id; i < pos.id + k; i++) {
+      copy_v[i] = value;
+    }
+    for (size_t i = pos.id + k; i < size_ + k; i++) {
+      copy_v[i] = (*this)[i - k];
+    }
   }
   catch (...) {
     throw std::bad_alloc();
   }
-  for (size_t i = 0; i < pos.id; i++) {
-    new_data[i] = data[i];
-  }
-  for (size_t i = pos.id; i < pos.id + k; i++) {
-    new_data[i] = value;
-  }
-  for (size_t i = pos.id + k; i < size_ + k; i++) {
-    new_data[i] = data[i - k];
-  }
-  size_ += k;
-  delete [] data;
-  data = new_data;
+  swap(copy_v);
 }
 
 template<class T>
 void iknk::Vector<T>::erase(size_t id) {
-  T * new_data = new T[capacity];
+  if (id > size_ - 1) {
+    throw std::out_of_range("id out of bound");
+  }
+  Vector< T > copy_v(size_ - 1);
+  size_t index = 0;
   for (size_t i = 0; i < size_; i++) {
     if (i == id) {
       continue;
     }
-    new_data[i] = data[i];
+    try {
+      copy_v[index] = (*this)[i];
+      index++;
+    }
+    catch (...) {
+      throw std::bad_alloc();
+    }
   }
-  delete [] data;
-  data = new_data;
-  size_--;
+  swap(copy_v);
 }
 
 template<class T>
 void iknk::Vector<T>::erase(size_t beg, size_t end) {
-  T * new_data = new T[capacity];
-  size_t id = 0;
-  for (size_t i = 0; i < size_; i++) {
-    if (i < beg || i >= end) {
-      new_data[id] = data[i];
-      id++;
+  if (beg > size_ - 1 || end > size_) {
+    throw std::out_of_range("id is out of bound");
+  }
+  size_t sizeOfSegment = end - beg;
+  Vector< T > copy_v(size_ - sizeOfSegment);
+  size_t index = 0;
+  try {
+    for (size_t i = 0; i < size_; i++) {
+      if (i < beg || i >= end) {
+        copy_v[index] = (*this)[i];
+        index++;
+      }
+      else {
+        continue;
+      }
     }
   }
-  delete [] data;
-  data = new_data;
-  size_ = size_ - (end - beg);
+  catch (...) {
+    throw std::bad_alloc();
+  }
+  swap(copy_v);
+}
+
+template<class T>
+void iknk::Vector<T>::erase(Iterator<T> pos) {
+  erase(pos.id);
+}
+
+template<class T>
+void iknk::Vector<T>::erase(Iterator<T> begin, Iterator<T> end) {
+  erase(begin.id, end.id);
+}
+
+template<class T>
+void iknk::Vector<T>::erase(CIterator<T> begin, size_t k) {
+  if (k + begin.id + 1 > size_) {
+    throw std::logic_error("Too many element must be deleted");
+  }
+  Vector < T > new_vector;
+  try {
+    new_vector = Vector< T >(size_ - k, capacity);
+    size_ -= k;
+  }
+  catch (...) {
+    throw std::bad_alloc();
+  }
+  auto it = new_vector.begin();
+  auto main_iter = cbegin();
+  for (; main_iter != begin; main_iter += 1) {
+    it.write(main_iter.read());
+    it = it + 1;
+  }
+  main_iter += k;
+  for (; main_iter != end(); main_iter += 1) {
+    it.write(main_iter.read());
+  }
+  *this = std::move(new_vector);
 }
 
 template<class T>
