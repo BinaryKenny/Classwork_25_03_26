@@ -57,6 +57,7 @@ namespace iknk
     T & at(size_t id);
     const T & at(size_t id) const;
     bool operator==(const Vector<T> & rhs) const noexcept;
+    bool operator!=(const Vector<T> & rhs) const noexcept;
 
     private:
       explicit Vector(size_t size);
@@ -68,10 +69,13 @@ namespace iknk
   struct Iterator {
     Iterator(Vector< T > &, size_t);
     ~Iterator() = default;
-    Iterator< T > operator+(size_t i);
-    Iterator< T > operator-(size_t i);
-    void write(Iterator< T > & it, const T & value);
-    void cut(Iterator< T > & it);
+    void operator+=(size_t i);
+    void operator-=(size_t i);
+    void write(const T & value);
+    void cut();
+    T & operator*() const noexcept;
+    bool operator==(const Iterator< T > & rhs) const noexcept;
+    bool operator!=(const Iterator< T > & rhs) const noexcept;
 
     Vector<T> & vector;
     size_t id;
@@ -81,9 +85,12 @@ namespace iknk
   struct CIterator {
     CIterator(Vector< T > &, size_t);
     ~CIterator() = default;
-    CIterator< T > operator+(size_t i);
-    CIterator< T > operator-(size_t i);
-    T read(CIterator< T > & it);
+    void operator+=(size_t i);
+    void operator-=(size_t i);
+    T & read();
+    T & operator*() const noexcept;
+    bool operator==(const CIterator< T > & rhs) const noexcept;
+    bool operator!=(const CIterator< T > & rhs) const noexcept;
 
     Vector< T > & vector;
     size_t id;
@@ -117,29 +124,44 @@ id(i)
 {}
 
 template<class T>
-iknk::Iterator<T> iknk::Iterator<T>::operator+(size_t i) {
-  if (id + i > vector.getSize() - 1) {
+void iknk::Iterator<T>::operator+=(size_t i) {
+  if (id + i > vector.getSize()) {
     throw std::out_of_range("Iterator is out of bound");
   }
-  return Iterator<T>(vector, id + i);
+  id += i;
 }
 
 template<class T>
-iknk::Iterator< T > iknk::Iterator<T>::operator-(size_t i) {
-  if (id + 1 - i <= 0) {
+void iknk::Iterator<T>::operator-=(size_t i) {
+  if (id + 1 - i < 0) {
     throw std::out_of_range("Iterator is out of bound");
   }
-  return Iterator< T >(vector, id - i);
+  id -= i;
 }
 
 template<class T>
-void iknk::Iterator<T>::write(Iterator<T> &it, const T &value) {
-  it.vector[id] = value;
+void iknk::Iterator<T>::write(const T &value) {
+  vector[id] = value;
 }
 
 template<class T>
-void iknk::Iterator<T>::cut(Iterator<T> &it) {
-  vector.erase(it.id);
+void iknk::Iterator<T>::cut() {
+  vector.erase(id);
+}
+
+template<class T>
+T & iknk::Iterator<T>::operator*() const noexcept {
+  return vector[id];
+}
+
+template<class T>
+bool iknk::Iterator<T>::operator==(const Iterator<T> &rhs) const noexcept {
+  return (*this).vector == rhs.vector && (*this).id == rhs.id;
+}
+
+template< class T >
+bool iknk::Iterator< T >::operator!=(const Iterator< T > & rhs) const noexcept {
+  return !(*this == rhs);
 }
 
 
@@ -150,26 +172,40 @@ id(i)
 {}
 
 template<class T>
-iknk::CIterator<T> iknk::CIterator<T>::operator+(size_t i) {
-  if (id + i > vector.getSize() - 1) {
+void iknk::CIterator<T>::operator+=(size_t i) {
+  if (id + i > vector.getSize()) {
     throw std::out_of_range("Const Iterator is out of bound");
   }
-  return CIterator<T>(vector, id + i);
+  id += i;
 }
 
 template<class T>
-iknk::CIterator<T> iknk::CIterator<T>::operator-(size_t i) {
-  if (id + 1 - i <= 0) {
+void iknk::CIterator<T>::operator-=(size_t i) {
+  if (id + 1 - i < 0) {
     throw std::out_of_range("Const Iterator is out of bound");
   }
-  return CIterator<T>(vector, id - i);
+  id -= i;
 }
 
 template<class T>
-T iknk::CIterator<T>::read(CIterator<T> &it) {
-  return it.vector[id];
+T & iknk::CIterator<T>::read() {
+  return vector[id];
 }
 
+template<class T>
+T & iknk::CIterator<T>::operator*() const noexcept {
+  return vector[id];
+}
+
+template<class T>
+bool iknk::CIterator<T>::operator==(const CIterator<T> &rhs) const noexcept {
+  return (*this).vector == rhs.vector && (*this).id == rhs.id;
+}
+
+template< class T >
+bool iknk::CIterator<T>::operator!=(const CIterator< T > & rhs) const noexcept {
+  return !(*this == rhs);
+}
 
 template<class T>
 iknk::Vector<T>::Vector(const Vector<T> & rhs):
@@ -294,7 +330,7 @@ iknk::Iterator<T> iknk::Vector<T>::begin() {
 
 template<class T>
 iknk::Iterator<T> iknk::Vector<T>::end() {
-  return Iterator< T >(*this, size_ - 1);
+  return Iterator< T >(*this, size_);
 }
 
 template<class T>
@@ -309,7 +345,7 @@ iknk::CIterator<T> iknk::Vector<T>::cbegin() {
 
 template< class T>
 iknk::CIterator< T > iknk::Vector< T >::cend() {
-  return CIterator< T >(*this, size_ - 1);
+  return CIterator< T >(*this, size_);
 }
 
 template<class T>
@@ -458,29 +494,27 @@ void iknk::Vector<T>::erase(Iterator<T> begin, Iterator<T> end) {
 
 template<class T>
 void iknk::Vector<T>::erase(CIterator<T> begin, size_t k) {
-  if (k + begin.id + 1 > size_) {
-    throw std::logic_error("Too many element must be deleted");
+  if (k + begin.id > size_) {
+    throw std::out_of_range("Too many element must be deleted");
   }
-  Vector < T > new_vector;
-  try {
-    new_vector = Vector< T >(size_ - k, capacity);
-    size_ -= k;
+  if (*this != begin.vector) {
+    throw std::logic_error("Iterator indicates to other vector");
   }
-  catch (...) {
-    throw std::bad_alloc();
-  }
-  auto it = new_vector.begin();
+  Vector< T > v(size_ - k);
+  auto it = v.begin();
   auto main_iter = cbegin();
   for (; main_iter != begin; main_iter += 1) {
-    it.write(main_iter.read());
-    it = it + 1;
+    *it = *main_iter;
+    it += 1;
   }
   main_iter += k;
-  for (; main_iter != end(); main_iter += 1) {
-    it.write(main_iter.read());
+  for (; main_iter != cend(); main_iter += 1) {
+    *it = *main_iter;
+    it += 1;
   }
-  *this = std::move(new_vector);
+  swap(v);
 }
+
 
 template<class T>
 size_t iknk::Vector<T>::getCapacity() const noexcept
@@ -536,5 +570,10 @@ bool iknk::Vector<T>::operator==(const Vector<T> & rhs) const noexcept
     }
   }
   return true;
+}
+
+template<class T>
+bool iknk::Vector<T>::operator!=(const Vector<T> &rhs) const noexcept {
+  return !(*this == rhs);
 }
 #endif

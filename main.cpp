@@ -460,6 +460,39 @@ bool testSegmentIteratorErase(const char ** pname) {
   return true;
 }
 
+bool testCountIteratorErase(const char ** pname) {
+  *pname = __func__;
+  Vector< int > vector;
+  vector.pushBack(76);
+  vector.pushBack(43);
+  vector.pushBack(67);
+  vector.pushBack(100);
+  vector.pushBack(69);
+  auto pos = vector.citerator(3);
+  vector.erase(pos, 2);
+  if (vector[vector.getSize() - 1] == 67 && vector.getSize() == 3) {
+    return true;
+  }
+  return false;
+}
+
+bool testErrorCountIteratorErase(const char ** pname) {
+  *pname = __func__;
+  Vector< int > vector(10, 20);
+  auto iter = vector.citerator(8);
+  try {
+    vector.erase(iter,3);
+    return false;
+  }
+  catch (const std::out_of_range & e) {
+    const char * text = e.what();
+    return !strcmp("Too many element must be deleted", text);
+  }
+  catch (...) {
+    return false;
+  }
+}
+
 int main()
 {
   size_t failed = 0;
@@ -507,7 +540,9 @@ int main()
     {testSegmentIteratorInsert, "Unbound iterator must have the added values and bigger size then before"},
     {testRepetitiveInsert, "Unbound iterator must have the added value and vector must be bigger then before"},
     {testSingleIteratorErase, "Erase must delete a value that indicated by iterator"},
-    {testSegmentIteratorErase, "Erase must delete the segment that indicated by iterators"}
+    {testSegmentIteratorErase, "Erase must delete the segment that indicated by iterators"},
+    {testCountIteratorErase, "Count erase must delete some element from vector"},
+    {testErrorCountIteratorErase, "If too many element must be deleted it should throw the exception"}
   };
   size_t count = sizeof(tests) / sizeof(case_t);
   for (size_t i = 0; i < count; i++)
